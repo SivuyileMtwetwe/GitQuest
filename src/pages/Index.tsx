@@ -90,6 +90,27 @@ const App: React.FC = () => {
 
     for (let i = 0; i < retries; i++) {
       try {
+        // First, try to create the profile if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .upsert({ 
+            id: userId,
+            username: `user_${userId.slice(0, 8)}`,
+            created_at: new Date().toISOString()
+          }, {
+            onConflict: 'id'
+          });
+
+        if (insertError) {
+          console.error(`Attempt ${i + 1}/${retries} - Error creating profile:`, insertError);
+          // Only wait and retry if it's not a unique constraint violation
+          if (!insertError.message.includes('unique constraint')) {
+            await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
+            continue;
+          }
+        }
+
+        // Then check if the profile exists
         const { data, error } = await supabase
           .from('profiles')
           .select('id')
@@ -98,8 +119,7 @@ const App: React.FC = () => {
 
         if (error) {
           console.error(`Attempt ${i + 1}/${retries} - Error checking profile:`, error);
-          // Wait longer between retries as attempts increase
-          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
           continue;
         }
 
@@ -109,12 +129,10 @@ const App: React.FC = () => {
         }
 
         console.log(`Attempt ${i + 1}/${retries} - Profile not found, retrying...`);
-        // Wait for 1 second before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
       } catch (err) {
         console.error(`Attempt ${i + 1}/${retries} - Unexpected error:`, err);
-        // Wait longer between retries as attempts increase
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
       }
     }
     
