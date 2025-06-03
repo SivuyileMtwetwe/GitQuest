@@ -14,13 +14,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 
+// Base schema for sign in
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  username: z.string().min(3, 'Username must be at least 3 characters').optional(),
 });
 
-type AuthFormData = z.infer<typeof authSchema>;
+// Extended schema for sign up that requires username
+const signUpSchema = authSchema.extend({
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+});
+
+type AuthFormData = z.infer<typeof signUpSchema>;
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -32,20 +37,24 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+    resolver: zodResolver(isSignUp ? signUpSchema : authSchema),
   });
 
   const onSubmit = async (data: AuthFormData) => {
     setIsLoading(true);
     try {
       if (isSignUp) {
+        if (!data.username) {
+          throw new Error('Username is required for sign up');
+        }
+
         // Sign up flow
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
           options: {
             data: {
-              username: data.username, // Store username in auth metadata
+              username: data.username,
             }
           }
         });
@@ -66,6 +75,22 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         if (profileError) {
           // If profile creation fails, show error but don't delete auth user
           throw new Error('Failed to create profile: ' + profileError.message);
+        }
+
+        // Create initial score record
+        const { error: scoreError } = await supabase
+          .from('scores')
+          .insert([
+            {
+              user_id: authData.user.id,
+              points: 0,
+              level: 1,
+              achievements: []
+            }
+          ]);
+
+        if (scoreError) {
+          throw new Error('Failed to initialize score: ' + scoreError.message);
         }
 
         toast({
