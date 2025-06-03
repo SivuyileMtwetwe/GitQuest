@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import QuizChallenge from './QuizChallenge';
 import TerminalChallenge from './TerminalChallenge';
@@ -26,21 +25,21 @@ const MainContent: React.FC<MainContentProps> = ({
 
   if (!level) {
     return (
-      <div className="flex-1 p-8 flex items-center justify-center">
-        <div className="text-center space-y-6">
+      <div className="flex-1 p-4 md:p-8 flex items-center justify-center">
+        <div className="text-center space-y-6 w-full max-w-md mx-auto">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Welcome to GitHub Learning Quest!</h2>
-            <p className="text-gray-600">Select a level from the sidebar to begin your Git journey.</p>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Welcome to GitHub Learning Quest!</h2>
+            <p className="text-gray-600">Select a level from the menu to begin your Git journey.</p>
           </div>
           
-          <div className="bg-white/30 backdrop-blur-md rounded-xl p-6 border border-white/50">
+          <div className="bg-white/30 backdrop-blur-md rounded-xl p-4 md:p-6 border border-white/50">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Need Help with Terminal Errors?</h3>
             <p className="text-gray-600 mb-4">
               Having trouble with Git commands? Use our error solver to get instant solutions.
             </p>
             <Button
               onClick={() => setShowErrorSolver(true)}
-              className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+              className="w-full md:w-auto bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
             >
               <Bug className="w-4 h-4 mr-2" />
               Open Error Solver
@@ -58,7 +57,7 @@ const MainContent: React.FC<MainContentProps> = ({
                   ← Back to Welcome
                 </Button>
               </div>
-              <div className="bg-white/30 backdrop-blur-md rounded-xl p-8 border border-white/50 shadow-lg">
+              <div className="bg-white/30 backdrop-blur-md rounded-xl p-4 md:p-8 border border-white/50 shadow-lg">
                 <ErrorSolver />
               </div>
             </div>
@@ -69,15 +68,14 @@ const MainContent: React.FC<MainContentProps> = ({
   }
 
   if (!challenge) {
-    // Level requirements check
     const levelRequirements = { 1: 0, 2: 150, 3: 350, 4: 600, 5: 900, 6: 1250, 7: 1650, 8: 2100 };
     const requiredPoints = levelRequirements[level.id as keyof typeof levelRequirements];
     
     if (points < requiredPoints) {
       return (
-        <div className="flex-1 p-8 flex items-center justify-center">
-          <div className="text-center bg-white/30 backdrop-blur-md rounded-xl p-8 border border-white/50">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Level Locked</h2>
+        <div className="flex-1 p-4 md:p-8 flex items-center justify-center">
+          <div className="text-center bg-white/30 backdrop-blur-md rounded-xl p-6 md:p-8 border border-white/50">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Level Locked</h2>
             <p className="text-gray-600 mb-4">
               You need {requiredPoints - points} more points to unlock {level.title}.
             </p>
@@ -90,9 +88,9 @@ const MainContent: React.FC<MainContentProps> = ({
     }
 
     return (
-      <div className="flex-1 p-8 flex items-center justify-center">
-        <div className="text-center bg-white/30 backdrop-blur-md rounded-xl p-8 border border-white/50">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">🎉 Level Complete!</h2>
+      <div className="flex-1 p-4 md:p-8 flex items-center justify-center">
+        <div className="text-center bg-white/30 backdrop-blur-md rounded-xl p-6 md:p-8 border border-white/50">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">🎉 Level Complete!</h2>
           <p className="text-gray-600">
             Congratulations! You've completed all challenges in {level.title}.
           </p>
@@ -102,14 +100,14 @@ const MainContent: React.FC<MainContentProps> = ({
   }
 
   return (
-    <div className="flex-1 p-8">
+    <div className="flex-1 p-4 md:p-8 overflow-y-auto">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               {level.title}
             </h1>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between md:justify-end gap-4">
               <Button
                 variant="outline"
                 size="sm"
@@ -133,11 +131,11 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {showErrorSolver ? (
-          <div className="bg-white/30 backdrop-blur-md rounded-xl p-8 border border-white/50 shadow-lg">
+          <div className="bg-white/30 backdrop-blur-md rounded-xl p-4 md:p-8 border border-white/50 shadow-lg">
             <ErrorSolver />
           </div>
         ) : (
-          <div className="bg-white/30 backdrop-blur-md rounded-xl p-8 border border-white/50 shadow-lg">
+          <div className="bg-white/30 backdrop-blur-md rounded-xl p-4 md:p-8 border border-white/50 shadow-lg">
             {challenge.type === 'quiz' ? (
               <QuizChallenge challenge={challenge} onComplete={onChallengeComplete} />
             ) : (

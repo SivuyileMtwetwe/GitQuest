@@ -1,46 +1,55 @@
-
 import React from 'react';
-import { Star, Award, TrendingUp } from 'lucide-react';
+import { Star, Award, TrendingUp, Menu } from 'lucide-react';
 import { GameState } from '../pages/Index';
+import { Button } from './ui/button';
 
 interface HeaderProps {
   gameState: GameState;
+  onMenuClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ gameState }) => {
+const Header: React.FC<HeaderProps> = ({ gameState, onMenuClick }) => {
   const progressToNextLevel = (gameState.points % 100) / 100;
   const nextLevelPoints = 100 - (gameState.points % 100);
 
   return (
     <header className="h-20 bg-white/20 backdrop-blur-md border-b border-white/30">
-      <div className="h-full px-6 flex items-center justify-between">
-        <div className="flex items-center space-x-6">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+      <div className="h-full px-4 md:px-6 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={onMenuClick}
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+          <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             GitHub Learning Quest
           </h1>
         </div>
         
-        <div className="flex items-center space-x-8">
-          {/* Level Display */}
-          <div className="flex items-center space-x-2">
-            <TrendingUp className="w-5 h-5 text-purple-600" />
-            <span className="text-gray-700 font-semibold">Level {gameState.currentLevel}</span>
+        <div className="flex items-center space-x-2 md:space-x-8">
+          {/* Level Display - Always visible */}
+          <div className="flex items-center space-x-1 md:space-x-2">
+            <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
+            <span className="text-sm md:text-base text-gray-700 font-semibold">Level {gameState.currentLevel}</span>
           </div>
 
-          {/* Points Display */}
-          <div className="flex items-center space-x-2">
-            <Star className="w-5 h-5 text-yellow-500" />
-            <span className="text-gray-700 font-semibold">{gameState.points} pts</span>
+          {/* Points Display - Always visible */}
+          <div className="flex items-center space-x-1 md:space-x-2">
+            <Star className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" />
+            <span className="text-sm md:text-base text-gray-700 font-semibold">{gameState.points}</span>
           </div>
 
-          {/* Achievements */}
-          <div className="flex items-center space-x-2">
+          {/* Achievements - Hidden on mobile */}
+          <div className="hidden md:flex items-center space-x-2">
             <Award className="w-5 h-5 text-blue-600" />
             <span className="text-gray-700 font-semibold">{gameState.achievements.length} badges</span>
           </div>
 
-          {/* Progress Bar */}
-          <div className="flex flex-col items-end">
+          {/* Progress Bar - Hidden on mobile */}
+          <div className="hidden md:flex flex-col items-end">
             <div className="text-xs text-gray-600 mb-1">
               {nextLevelPoints} pts to next level
             </div>

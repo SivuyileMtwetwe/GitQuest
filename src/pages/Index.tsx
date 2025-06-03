@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
@@ -34,6 +33,7 @@ const App: React.FC = () => {
   const [points, setPoints] = useState<number>(0);
   const [achievements] = useState<any[]>([]);
   const [incorrectAnswers, setIncorrectAnswers] = useState<Set<number>>(new Set());
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Define minimum points required for each level
   const levelRequirements = {
@@ -402,7 +402,8 @@ const App: React.FC = () => {
   const handleSelectLevel = (levelId: number) => {
     setCurrentLevel(levelId);
     setChallengeIndex(0);
-    setIncorrectAnswers(new Set()); // Reset incorrect answers when changing levels
+    setIncorrectAnswers(new Set());
+    setIsSidebarOpen(false);
   };
 
   const handleChallengeComplete = (isCorrect: boolean) => {
@@ -412,7 +413,6 @@ const App: React.FC = () => {
       const currentChallenge = currentLevelData.challenges[challengeIndex];
       
       if (isCorrect) {
-        // Remove from incorrect answers if it was previously wrong
         setIncorrectAnswers(prev => {
           const newSet = new Set(prev);
           newSet.delete(currentChallenge.id);
@@ -421,13 +421,11 @@ const App: React.FC = () => {
         
         setPoints(prevPoints => prevPoints + 50);
         
-        // Check if there are any remaining incorrect answers
         const hasIncorrectAnswers = incorrectAnswers.size > 0 && !incorrectAnswers.has(currentChallenge.id);
         
         if (challengeIndex < currentLevelData.challenges.length - 1) {
           setChallengeIndex(prevIndex => prevIndex + 1);
         } else if (!hasIncorrectAnswers) {
-          // Level completed with all correct answers - mark as complete
           setLevels(prevLevels =>
             prevLevels.map(level =>
               level.id === currentLevel
@@ -436,7 +434,6 @@ const App: React.FC = () => {
             )
           );
 
-          // Check if user can advance to next level
           const nextLevelId = currentLevel + 1;
           const nextLevelExists = levels.find(level => level.id === nextLevelId);
           
@@ -444,7 +441,6 @@ const App: React.FC = () => {
             const newPoints = points + 50;
             const requiredPointsForNext = levelRequirements[nextLevelId as keyof typeof levelRequirements];
             
-            // Auto-advance if user has enough points for the next level
             if (newPoints >= requiredPointsForNext) {
               setTimeout(() => {
                 setCurrentLevel(nextLevelId);
@@ -454,21 +450,17 @@ const App: React.FC = () => {
             }
           }
         } else {
-          // Go to first incorrect answer
           const firstIncorrectId = Array.from(incorrectAnswers)[0];
           const incorrectIndex = currentLevelData.challenges.findIndex(c => c.id === firstIncorrectId);
           setChallengeIndex(incorrectIndex);
         }
       } else {
-        // Add to incorrect answers
         setIncorrectAnswers(prev => new Set(prev).add(currentChallenge.id));
         setPoints(prevPoints => Math.max(0, prevPoints - 25));
         
-        // Move to next challenge
         if (challengeIndex < currentLevelData.challenges.length - 1) {
           setChallengeIndex(prevIndex => prevIndex + 1);
         } else {
-          // Go to first incorrect answer if at end
           const firstIncorrectId = Array.from(incorrectAnswers)[0] || currentChallenge.id;
           const incorrectIndex = currentLevelData.challenges.findIndex(c => c.id === firstIncorrectId);
           setChallengeIndex(incorrectIndex);
@@ -488,13 +480,18 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-      <Header gameState={gameState} />
-      <div className="flex flex-1">
+      <Header 
+        gameState={gameState} 
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+      />
+      <div className="flex flex-1 relative">
         <Sidebar
           levels={levels}
           currentLevel={currentLevel}
           onSelectLevel={handleSelectLevel}
           points={points}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
         <MainContent
           level={currentLevelData}
