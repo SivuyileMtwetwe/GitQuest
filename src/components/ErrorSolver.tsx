@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, AlertCircle, CheckCircle, Copy } from 'lucide-react';
 import { Textarea } from './ui/textarea';
@@ -9,7 +8,7 @@ const ErrorSolver: React.FC = () => {
   const [solution, setSolution] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Comprehensive Git/terminal errors and their solutions
+  // Comprehensive error solutions database
   const errorSolutions: { [key: string]: string } = {
     // Git repository errors
     'fatal: not a git repository': 'Run `git init` to initialize a new Git repository in this directory.',
@@ -18,102 +17,54 @@ const ErrorSolver: React.FC = () => {
     'fatal: could not read from remote repository': 'Verify your SSH key is added to your Git provider or use HTTPS: `git remote set-url origin https://github.com/user/repo.git`',
     'fatal: authentication failed': 'Check your credentials. For GitHub, use a personal access token instead of password: `git config --global credential.helper store`',
     
-    // Remote and branch errors
+    // Git remote and branch errors
     'fatal: remote origin already exists': 'Remove the existing remote with `git remote rm origin` then add the new one with `git remote add origin <url>`',
     'fatal: refusing to merge unrelated histories': 'Use `git pull origin main --allow-unrelated-histories` to force the merge, then resolve conflicts.',
     'error: failed to push some refs': 'Pull the latest changes first with `git pull origin main --rebase` then push again with `git push origin main`',
     'error: src refspec main does not exist': 'Create and switch to main branch: `git checkout -b main` or push current branch: `git push -u origin HEAD`',
     'fatal: branch already exists': 'Switch to existing branch with `git checkout branch-name` or force create with `git checkout -B branch-name`',
-    'error: pathspec did not match any files': 'Check if the file exists with `ls -la`. Verify the correct path and filename spelling.',
     
-    // Merge and rebase errors
+    // Git merge and rebase errors
     'merge conflict': 'Open conflicted files, resolve conflicts manually (remove <<<<, ====, >>>> markers), then run `git add .` and `git commit`',
     'error: cannot pull with rebase': 'Resolve conflicts first, then continue with `git rebase --continue` or abort with `git rebase --abort`',
     'fatal: you have diverged branches': 'Use `git pull --rebase origin main` to rebase your changes, or `git merge origin/main` to merge.',
     'automatic merge failed': 'Resolve conflicts in the listed files, then `git add .` and `git commit` to complete the merge.',
-    'error: your local changes would be overwritten': 'Stash your changes with `git stash`, pull updates with `git pull`, then apply stash with `git stash pop`',
     
-    // Permission and access errors
-    'permission denied': 'Try running the command with `sudo` or check file permissions with `ls -la` and use `chmod` to fix permissions.',
-    'permission denied (publickey)': 'Generate SSH key with `ssh-keygen -t ed25519 -C "email@example.com"` and add to your Git provider.',
-    'fatal: could not create work tree': 'Check directory permissions and ensure you have write access to the parent directory.',
-    'error: insufficient permission': 'Check file/directory permissions with `ls -la` and use `sudo` if necessary.',
+    // Node.js errors
+    'error: enoent no such file': 'File or directory is missing. Check path and ensure file exists. Run `npm install` to restore dependencies.',
+    'error: cannot find module': 'Module not found. Run `npm install <package-name>` or check import path spelling.',
+    'error: port already in use': 'Port is occupied. Find process: `lsof -i :PORT` and kill it, or use different port.',
+    'error: digital envelope routines::unsupported': 'Node.js version conflict. Use `export NODE_OPTIONS=--openssl-legacy-provider` or update Node version.',
+    'npm err! code elifecycle': 'NPM lifecycle script failed. Clear NPM cache with `npm cache clean --force` and reinstall dependencies.',
     
-    // File and directory errors
-    'command not found': 'The command is not installed or not in PATH. Install with package manager (apt, brew, yum) or check spelling.',
-    'no such file or directory': 'Check if the file/directory exists with `ls -la`. Verify the correct path and spelling.',
-    'directory not empty': 'Use `rm -rf directory-name` to remove non-empty directory or `rmdir` for empty directories.',
-    'file exists': 'The file already exists. Use `-f` flag to force overwrite or choose a different filename.',
-    'disk space': 'Clean up disk space with `df -h` to check usage, `du -sh *` to find large files, and remove unnecessary files.',
-    
-    // Network and connection errors
-    'connection timed out': 'Check internet connection. Try using different DNS (8.8.8.8) or VPN. Increase timeout with `--timeout` flag.',
-    'connection refused': 'Service may be down or firewall blocking. Check if service is running and ports are open.',
-    'host unreachable': 'Check network connectivity with `ping google.com`. Verify DNS settings and network configuration.',
-    'ssl certificate': 'Update certificates or bypass with `-k` flag (curl) or `git config --global http.sslverify false` (temporary).',
-    
-    // Git state errors
-    'detached head state': 'Create a new branch from current state: `git checkout -b new-branch-name` or return to main: `git checkout main`',
-    'fatal: cannot lock ref': 'Clean up Git references: `git gc --prune=now` and remove lock files: `rm .git/refs/heads/branch.lock`',
-    'fatal: loose object is corrupt': 'Restore from backup or use `git fsck --full` to check integrity and `git gc --aggressive` to clean up.',
-    'fatal: bad object': 'Repository corruption. Try `git fsck` to identify issues and `git reflog` to recover lost commits.',
+    // Vue.js errors
+    'component name "app" has already been used': 'Rename your component to be unique. Component names must be unique within their scope.',
+    '[vue warn]: failed to mount app': 'Check if mounting element exists in HTML and Vue app is properly initialized.',
+    '[vue warn]: property or method is not defined': 'Property not found in component data/methods. Define it in the component options.',
+    '[vue warn]: duplicate keys detected': 'Each v-for item needs a unique key. Use :key with unique values.',
+    'uncaught typeerror: cannot read property of undefined': 'Data property accessed before initialization. Use v-if to wait for data or provide default value.',
     
     // Package manager errors
-    'package not found': 'Update package lists with `apt update` (Ubuntu) or `brew update` (Mac), then install the package.',
-    'dependency conflict': 'Use `apt --fix-broken install` (Ubuntu) or reinstall conflicting packages individually.',
-    'lock file': 'Another package manager process is running. Wait or remove lock file: `sudo rm /var/lib/apt/lists/lock`',
-    'signature verification failed': 'Update package signing keys or use `--allow-unauthenticated` flag (not recommended).',
+    'npm err! code eacces': 'Permission error. Fix with: `sudo chown -R $(whoami) ~/.npm` or use `sudo npm install -g`',
+    'npm err! code eresolve': 'Dependency conflict. Try `npm install --legacy-peer-deps` or update conflicting packages.',
+    'yarn error an unexpected error occurred': 'Clear Yarn cache with `yarn cache clean` and try again.',
+    'npm err! code eintegrity': 'Package integrity check failed. Delete package-lock.json and node_modules, then run `npm install`',
     
-    // Node.js/npm errors
-    'module not found': 'Install missing module with `npm install <module-name>` or check import path spelling.',
-    'enoent no such file': 'File or directory missing. Check path and ensure file exists. May need `npm install` to restore dependencies.',
-    'eacces permission denied': 'Fix npm permissions with `sudo chown -R $(whoami) ~/.npm` or use `sudo npm install -g`',
-    'peer dependency': 'Install peer dependencies manually: `npm install <peer-dep>` or use `npm install --legacy-peer-deps`',
-    'version conflict': 'Update packages with `npm update` or specify exact versions in package.json.',
+    // Build errors
+    'error: failed to compile': 'Check build logs for syntax errors or missing dependencies.',
+    'error: chunk loading failed': 'Dynamic import failed. Check network connectivity and import path.',
+    'error: maximum call stack size exceeded': 'Infinite recursion in code. Check for circular dependencies or infinite loops.',
+    'error: unexpected token': 'Syntax error in code. Check for missing brackets, quotes, or semicolons.',
     
-    // Docker errors
-    'docker daemon not running': 'Start Docker service: `sudo systemctl start docker` (Linux) or start Docker Desktop (Mac/Windows).',
-    'permission denied docker': 'Add user to docker group: `sudo usermod -aG docker $USER` then logout/login.',
-    'image not found': 'Pull the image first: `docker pull <image-name>` or check image name spelling.',
-    'port already in use': 'Stop process using port: `lsof -ti:3000 | xargs kill -9` or use different port.',
-    'no space left': 'Clean Docker resources: `docker system prune -a` to remove unused images, containers, and networks.',
+    // Vue Router errors
+    'uncaught error: missing param': 'Required route parameter is missing. Check route definition and navigation.',
+    'navigation duplicated': 'Attempting to navigate to current route. Add catch handler or check navigation guard.',
+    'route not found': 'Route path not defined in router configuration. Add route or check path spelling.',
     
-    // SSH errors
-    'ssh connection refused': 'Check if SSH service is running: `sudo systemctl status ssh` and ensure port 22 is open.',
-    'host key verification failed': 'Remove old host key: `ssh-keygen -R hostname` then try connecting again.',
-    'too many authentication failures': 'Use specific key: `ssh -i ~/.ssh/specific_key user@host` or check SSH agent.',
-    
-    // File system errors
-    'read-only file system': 'Remount with write permissions: `sudo mount -o remount,rw /` or check disk health.',
-    'operation not permitted': 'Check file permissions and use `sudo` if needed. On Mac, check System Integrity Protection.',
-    'no space left on device': 'Free up space: `df -h` to check usage, `ncdu /` to find large directories, remove unnecessary files.',
-    'input/output error': 'Hardware issue likely. Check disk health with `fsck /dev/sdX` and consider disk replacement.',
-    
-    // Process and system errors
-    'process already running': 'Find and kill process: `ps aux | grep process-name` then `kill -9 PID`',
-    'zombie process': 'Kill parent process or restart system. Use `ps aux | grep Z` to find zombie processes.',
-    'segmentation fault': 'Program crashed. Check logs, update software, or report bug. May indicate memory corruption.',
-    'killed': 'Process was terminated, likely by OOM killer. Check memory usage with `free -h` and increase swap.',
-    
-    // Environment and PATH errors
-    'command not found bash': 'Command not in PATH. Add to PATH: `export PATH=$PATH:/path/to/command` or install package.',
-    'bad interpreter': 'Script shebang is wrong or interpreter not installed. Fix shebang line or install required interpreter.',
-    'syntax error': 'Check script syntax. For bash: `bash -n script.sh`. Fix syntax errors in the script.',
-    
-    // Database errors
-    'connection refused database': 'Database server not running. Start with `sudo systemctl start postgresql/mysql` or check connection settings.',
-    'access denied database': 'Check database credentials and user permissions. Grant necessary privileges to database user.',
-    'table does not exist': 'Run database migrations or create table. Check table name spelling and database schema.',
-    
-    // Web server errors
-    'address already in use': 'Port is occupied. Find process: `lsof -i :PORT` and kill it, or use different port.',
-    'connection reset': 'Server closed connection. Check server logs, firewall settings, and network stability.',
-    'certificate expired': 'Renew SSL certificate. For Let\'s Encrypt: `certbot renew` or update certificate files.',
-    
-    // Compilation errors
-    'make: command not found': 'Install build tools: `sudo apt install build-essential` (Ubuntu) or `xcode-select --install` (Mac)',
-    'gcc: command not found': 'Install compiler: `sudo apt install gcc` (Ubuntu) or install Xcode Command Line Tools (Mac)',
-    'undefined reference': 'Missing library during linking. Add library with `-l` flag or install development packages.',
+    // Vuex errors
+    'vuex unknown action type': 'Action not defined in Vuex store. Register action in store configuration.',
+    'vuex unknown mutation type': 'Mutation not defined in Vuex store. Register mutation in store configuration.',
+    '[vuex] unknown getter': 'Getter not defined in Vuex store. Register getter in store configuration.',
     
     // Generic fallbacks
     'error': 'Check the error message details. Try running with verbose flags (-v, --verbose) for more information.',
@@ -231,7 +182,7 @@ const ErrorSolver: React.FC = () => {
         <h4 className="font-medium text-gray-800 mb-2">Error Categories We Cover:</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
           <div>
-            <strong>Git & Version Control:</strong>
+            <strong>Git & GitHub:</strong>
             <ul className="ml-2">
               <li>• Repository errors</li>
               <li>• Merge conflicts</li>
@@ -240,21 +191,21 @@ const ErrorSolver: React.FC = () => {
             </ul>
           </div>
           <div>
-            <strong>System & Network:</strong>
+            <strong>Node.js & NPM:</strong>
             <ul className="ml-2">
-              <li>• Permission errors</li>
-              <li>• File system issues</li>
-              <li>• Network problems</li>
-              <li>• Process management</li>
+              <li>• Module errors</li>
+              <li>• Build failures</li>
+              <li>• Dependency issues</li>
+              <li>• Version conflicts</li>
             </ul>
           </div>
           <div>
-            <strong>Development:</strong>
+            <strong>Vue.js:</strong>
             <ul className="ml-2">
-              <li>• Package managers</li>
-              <li>• Docker issues</li>
-              <li>• Database errors</li>
-              <li>• Compilation problems</li>
+              <li>• Component errors</li>
+              <li>• Router issues</li>
+              <li>• Vuex problems</li>
+              <li>• Build failures</li>
             </ul>
           </div>
         </div>
