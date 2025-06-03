@@ -1,16 +1,23 @@
 import React from 'react';
-import { Star, Award, TrendingUp, Menu } from 'lucide-react';
+import { Star, Award, TrendingUp, Menu, LogIn, LogOut } from 'lucide-react';
 import { GameState } from '../pages/Index';
 import { Button } from './ui/button';
+import { supabase } from '@/lib/supabase';
 
 interface HeaderProps {
   gameState: GameState;
   onMenuClick: () => void;
+  onAuthClick: () => void;
+  user: any;
 }
 
-const Header: React.FC<HeaderProps> = ({ gameState, onMenuClick }) => {
+const Header: React.FC<HeaderProps> = ({ gameState, onMenuClick, onAuthClick, user }) => {
   const progressToNextLevel = (gameState.points % 100) / 100;
   const nextLevelPoints = 100 - (gameState.points % 100);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   return (
     <header className="h-20 bg-white/20 backdrop-blur-md border-b border-white/30">
@@ -60,6 +67,29 @@ const Header: React.FC<HeaderProps> = ({ gameState, onMenuClick }) => {
               />
             </div>
           </div>
+
+          {/* Auth Button */}
+          {user ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSignOut}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden md:inline">Sign Out</span>
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onAuthClick}
+              className="flex items-center gap-2"
+            >
+              <LogIn className="w-4 h-4" />
+              <span className="hidden md:inline">Sign In</span>
+            </Button>
+          )}
         </div>
       </div>
     </header>

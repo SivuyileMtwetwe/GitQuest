@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import MainContent from '../components/MainContent';
 import Header from '../components/Header';
+import { AuthModal } from '../components/AuthModal';
+import { Leaderboard } from '../components/Leaderboard';
+import { supabase } from '../lib/supabase';
+import { useAchievements } from '../hooks/useAchievements';
+import { AchievementPopup } from '../components/AchievementPopup';
 
 export interface Challenge {
   id: number;
@@ -31,11 +36,12 @@ const App: React.FC = () => {
   const [currentLevel, setCurrentLevel] = useState<number>(1);
   const [challengeIndex, setChallengeIndex] = useState<number>(0);
   const [points, setPoints] = useState<number>(0);
-  const [achievements] = useState<any[]>([]);
   const [incorrectAnswers, setIncorrectAnswers] = useState<Set<number>>(new Set());
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
-  // Define minimum points required for each level
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const { achievements, unlockAchievement, showPopup, latestAchievement, hidePopup } = useAchievements();
+
   const levelRequirements = {
     1: 0,
     2: 150,
@@ -389,15 +395,64 @@ const App: React.FC = () => {
   ]);
 
   useEffect(() => {
-    const storedPoints = localStorage.getItem('gitQuestPoints');
-    if (storedPoints) {
-      setPoints(parseInt(storedPoints, 10));
-    }
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        loadUserProgress(session.user.id);
+      }
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        loadUserProgress(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
+  const loadUserProgress = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('scores')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error loading progress:', error);
+      return;
+    }
+
+    if (data) {
+      setPoints(data.points);
+      setCurrentLevel(data.level);
+      // Load achievements if you store them
+    }
+  };
+
+  const saveProgress = async () => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('scores')
+      .upsert({
+        user_id: user.id,
+        points,
+        level: currentLevel,
+        achievements: JSON.stringify(achievements)
+      });
+
+    if (error) {
+      console.error('Error saving progress:', error);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem('gitQuestPoints', points.toString());
-  }, [points]);
+    saveProgress();
+  }, [points, currentLevel]);
 
   const handleSelectLevel = (levelId: number) => {
     setCurrentLevel(levelId);
@@ -481,8 +536,10 @@ const App: React.FC = () => {
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-100 to-gray-200">
       <Header 
-        gameState={gameState} 
-        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+        gameState={gameState}
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        onAuthClick={() => setIsAuthModalOpen(true)}
+        user={user}
       />
       <div className="flex flex-1 relative">
         <Sidebar
@@ -493,14 +550,35 @@ const App: React.FC = () => {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
-        <MainContent
-          level={currentLevelData}
-          challenge={currentChallenge}
-          challengeIndex={challengeIndex}
-          onChallengeComplete={handleChallengeComplete}
-          points={points}
-        />
+        <div className="flex-1 flex flex-col md:flex-row gap-6 p-4 overflow-y-auto">
+          <div className="flex-1">
+            <MainContent
+              level={currentLevelData}
+              challenge={currentChallenge}
+              challengeIndex={challengeIndex}
+              onChallengeComplete={handleChallengeComplete}
+              points={points}
+            />
+          </div>
+          {user && (
+            <div className="md:w-80">
+              <Leaderboard />
+            </div>
+          )}
+        </div>
       </div>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
+
+      {showPopup && latestAchievement && (
+        <AchievementPopup 
+          achievement={latestAchievement}
+          onClose={hidePopup}
+        />
+      )}
     </div>
   );
 };
