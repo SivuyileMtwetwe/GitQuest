@@ -161,43 +161,45 @@ const App: React.FC = () => {
         .from('scores')
         .select('*')
         .eq('user_id', userId)
-        .maybeSingle();
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
 
       if (error) {
+        if (error.code === 'PGRST116') {
+          // No data found, initialize new user progress
+          console.log('Initializing new user progress');
+          const { error: insertError } = await supabase
+            .from('scores')
+            .insert([
+              {
+                user_id: userId,
+                points: 0,
+                level: 1,
+                achievements: '[]'
+              }
+            ]);
+
+          if (insertError) {
+            console.error('Error initializing user progress:', insertError);
+            return;
+          }
+
+          // Set initial state
+          setPoints(0);
+          setCurrentLevel(1);
+          setIsProgressLoaded(true);
+          return;
+        }
         console.error('Error loading progress:', error);
         return;
       }
 
-      if (data) {
-        // User has existing progress
-        console.log('Loaded existing progress:', data);
-        setPoints(data.points);
-        setCurrentLevel(data.level);
-        setIsProgressLoaded(true);
-      } else {
-        console.log('Initializing new user progress');
-        // Initialize new user progress
-        const { error: insertError } = await supabase
-          .from('scores')
-          .insert([
-            {
-              user_id: userId,
-              points: 0,
-              level: 1,
-              achievements: '[]'
-            }
-          ]);
-
-        if (insertError) {
-          console.error('Error initializing user progress:', insertError);
-          return;
-        }
-
-        // Set initial state
-        setPoints(0);
-        setCurrentLevel(1);
-        setIsProgressLoaded(true);
-      }
+      // User has existing progress
+      console.log('Loaded existing progress:', data);
+      setPoints(data.points);
+      setCurrentLevel(data.level);
+      setIsProgressLoaded(true);
     } catch (err) {
       console.error('Unexpected error loading progress:', err);
     }
