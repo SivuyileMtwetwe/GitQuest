@@ -7,6 +7,8 @@ import { Leaderboard } from '../components/Leaderboard';
 import { supabase, validateConnection } from '../lib/supabase';
 import { useAchievements } from '../hooks/useAchievements';
 import AchievementPopup from '../components/AchievementPopup';
+import { Button } from '@/components/ui/button';
+import { Play } from 'lucide-react';
 
 export interface Challenge {
   id: number;
@@ -41,6 +43,7 @@ const App: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isProgressLoaded, setIsProgressLoaded] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
   const { achievements, unlockAchievement, showPopup, latestAchievement, hidePopup } = useAchievements();
 
   const levelRequirements = {
@@ -321,6 +324,14 @@ const App: React.FC = () => {
     }
   };
 
+  const handleStartGame = () => {
+    setGameStarted(true);
+    // Reset game state
+    setCurrentLevel(1);
+    setChallengeIndex(0);
+    setIncorrectAnswers(new Set());
+  };
+
   const currentLevelData = levels.find(level => level.id === currentLevel);
   const currentChallenge = currentLevelData?.challenges[challengeIndex];
 
@@ -329,6 +340,37 @@ const App: React.FC = () => {
     points,
     achievements
   };
+
+  if (!gameStarted) {
+    return (
+      <div className="flex flex-col h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+        <Header 
+          gameState={gameState}
+          onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          onAuthClick={() => setIsAuthModalOpen(true)}
+          user={user}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center space-y-8 max-w-2xl mx-auto px-4">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              Welcome to GitHub Learning Quest
+            </h1>
+            <p className="text-xl text-gray-600">
+              Master Git through interactive challenges and level up your version control skills.
+            </p>
+            <Button
+              size="lg"
+              onClick={handleStartGame}
+              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-8 py-6 text-xl rounded-xl transform transition-transform hover:scale-105"
+            >
+              <Play className="w-6 h-6 mr-2" />
+              Start Learning
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-gray-100 to-gray-200">
@@ -381,3 +423,5 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+export default App
