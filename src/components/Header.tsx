@@ -2,6 +2,7 @@ import React from 'react';
 import { Star, Award, TrendingUp, Menu, LogIn, LogOut } from 'lucide-react';
 import { GameState } from '../pages/Index';
 import { Button } from './ui/button';
+import { ThemeToggle } from './ThemeToggle';
 import { supabase } from '@/lib/supabase';
 
 interface HeaderProps {
@@ -20,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ gameState, onMenuClick, onAuthClick, us
   };
 
   return (
-    <header className="h-20 bg-white/20 backdrop-blur-md border-b border-white/30">
+    <header className="h-20 bg-card backdrop-blur-md border-b">
       <div className="h-full px-4 md:px-6 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button
@@ -40,33 +41,36 @@ const Header: React.FC<HeaderProps> = ({ gameState, onMenuClick, onAuthClick, us
           {/* Level Display - Always visible */}
           <div className="flex items-center space-x-1 md:space-x-2">
             <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-purple-600" />
-            <span className="text-sm md:text-base text-gray-700 font-semibold">Level {gameState.currentLevel}</span>
+            <span className="text-sm md:text-base font-semibold">Level {gameState.currentLevel}</span>
           </div>
 
           {/* Points Display - Always visible */}
           <div className="flex items-center space-x-1 md:space-x-2">
             <Star className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" />
-            <span className="text-sm md:text-base text-gray-700 font-semibold">{gameState.points}</span>
+            <span className="text-sm md:text-base font-semibold">{gameState.points}</span>
           </div>
 
           {/* Achievements - Hidden on mobile */}
           <div className="hidden md:flex items-center space-x-2">
             <Award className="w-5 h-5 text-blue-600" />
-            <span className="text-gray-700 font-semibold">{gameState.achievements.length} badges</span>
+            <span className="font-semibold">{gameState.achievements.length} badges</span>
           </div>
 
           {/* Progress Bar - Hidden on mobile */}
           <div className="hidden md:flex flex-col items-end">
-            <div className="text-xs text-gray-600 mb-1">
+            <div className="text-xs text-muted-foreground mb-1">
               {nextLevelPoints} pts to next level
             </div>
-            <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="w-32 h-2 bg-secondary rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 ease-out"
                 style={{ width: `${progressToNextLevel * 100}%` }}
               />
             </div>
           </div>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           {/* Auth Button */}
           {user ? (

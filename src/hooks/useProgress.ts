@@ -13,10 +13,12 @@ export function useProgress() {
   const { user } = useAuth();
   const [progress, setProgress] = useState<Progress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Load progress
   useEffect(() => {
     if (!user) {
+      setProgress(null);
       setIsLoading(false);
       return;
     }
@@ -45,12 +47,30 @@ export function useProgress() {
     };
 
     loadProgress();
+
+    // Subscribe to realtime changes
+    const subscription = supabase
+      .channel('scores')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'scores',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        setProgress(payload.new as Progress);
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [user]);
 
-  // Save progress
+  // Save progress with debounce
   const saveProgress = async (newProgress: Progress) => {
-    if (!user) return;
+    if (!user || isSaving) return;
 
+    setIsSaving(true);
     try {
       const { error } = await supabase
         .from('scores')
@@ -71,12 +91,15 @@ export function useProgress() {
         description: "Your progress couldn't be saved. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return {
     progress,
     isLoading,
+    isSaving,
     saveProgress,
   };
 }

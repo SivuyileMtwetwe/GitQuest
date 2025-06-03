@@ -13,6 +13,11 @@ export function useKeyboardShortcuts(shortcuts: ShortcutConfig[]) {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input fields
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
       const shortcut = shortcuts.find(
         s => s.key === event.key && 
         (!s.ctrlKey || (s.ctrlKey && (event.ctrlKey || event.metaKey)))
@@ -36,7 +41,7 @@ export function useKeyboardShortcuts(shortcuts: ShortcutConfig[]) {
           {shortcuts.map((shortcut, i) => (
             <div key={i} className="flex justify-between">
               <span>{shortcut.description}</span>
-              <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg">
+              <kbd className="px-2 py-1 text-xs font-semibold bg-muted border rounded-lg">
                 {shortcut.ctrlKey ? 'Ctrl + ' : ''}{shortcut.key.toUpperCase()}
               </kbd>
             </div>
