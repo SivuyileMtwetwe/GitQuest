@@ -2,7 +2,7 @@ import React from 'react';
 import { Lock, Check, Play, Star } from 'lucide-react';
 import { Level } from '../pages/Index';
 import { Button } from './ui/button';
-import { Sheet, SheetContent } from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 
 interface SidebarProps {
   levels: Level[];
@@ -127,6 +127,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent side="left" className="w-[85%] max-w-md p-6 bg-gray-100">
+          <SheetHeader>
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          </SheetHeader>
           <SidebarContent />
         </SheetContent>
       </Sheet>
