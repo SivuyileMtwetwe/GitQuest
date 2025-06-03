@@ -77,8 +77,37 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const waitForProfile = async (userId: string, retries = 5): Promise<boolean> => {
+    for (let i = 0; i < retries; i++) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (data) {
+        return true;
+      }
+
+      if (error) {
+        console.error('Error checking profile:', error);
+      }
+
+      // Wait for 1 second before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    return false;
+  };
+
   const loadUserProgress = async (userId: string) => {
     try {
+      // Wait for profile to be created before proceeding
+      const profileExists = await waitForProfile(userId);
+      if (!profileExists) {
+        console.error('Profile not found after maximum retries');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('scores')
         .select('*')
