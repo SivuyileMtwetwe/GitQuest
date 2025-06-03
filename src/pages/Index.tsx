@@ -40,6 +40,7 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [isProgressLoaded, setIsProgressLoaded] = useState(false);
   const { achievements, unlockAchievement, showPopup, latestAchievement, hidePopup } = useAchievements();
 
   const levelRequirements = {
@@ -71,6 +72,8 @@ const App: React.FC = () => {
       setUser(session?.user ?? null);
       if (session?.user) {
         loadUserProgress(session.user.id);
+      } else {
+        setIsProgressLoaded(false);
       }
     });
 
@@ -127,6 +130,7 @@ const App: React.FC = () => {
 
     try {
       console.log('Loading user progress for:', userId);
+      setIsProgressLoaded(false);
       
       // Wait for profile to be created before proceeding
       const profileExists = await waitForProfile(userId);
@@ -151,6 +155,7 @@ const App: React.FC = () => {
         console.log('Loaded existing progress:', data);
         setPoints(data.points);
         setCurrentLevel(data.level);
+        setIsProgressLoaded(true);
       } else {
         console.log('Initializing new user progress');
         // Initialize new user progress
@@ -167,11 +172,13 @@ const App: React.FC = () => {
 
         if (insertError) {
           console.error('Error initializing user progress:', insertError);
+          return;
         }
 
         // Set initial state
         setPoints(0);
         setCurrentLevel(1);
+        setIsProgressLoaded(true);
       }
     } catch (err) {
       console.error('Unexpected error loading progress:', err);
@@ -179,7 +186,7 @@ const App: React.FC = () => {
   };
 
   const saveProgress = async () => {
-    if (!user) return;
+    if (!user || !isProgressLoaded) return;
 
     try {
       const { error } = await supabase
@@ -200,10 +207,10 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && isProgressLoaded) {
       saveProgress();
     }
-  }, [points, currentLevel, user]);
+  }, [points, currentLevel, user, isProgressLoaded]);
 
   const handleSelectLevel = (levelId: number) => {
     setCurrentLevel(levelId);
