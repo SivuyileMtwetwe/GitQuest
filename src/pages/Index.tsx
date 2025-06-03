@@ -4,7 +4,7 @@ import MainContent from '../components/MainContent';
 import Header from '../components/Header';
 import { AuthModal } from '../components/AuthModal';
 import { Leaderboard } from '../components/Leaderboard';
-import { supabase } from '../lib/supabase';
+import { supabase, validateConnection } from '../lib/supabase';
 import { useAchievements } from '../hooks/useAchievements';
 import AchievementPopup from '../components/AchievementPopup';
 
@@ -59,19 +59,30 @@ const App: React.FC = () => {
   ]);
 
   useEffect(() => {
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProgress(session.user.id);
+    const initializeApp = async () => {
+      try {
+        // Validate Supabase connection first
+        await validateConnection();
+        
+        // Check for existing session
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await loadUserProgress(session.user.id);
+        }
+      } catch (err) {
+        console.error('Failed to initialize app:', err);
+        // Handle initialization error (you might want to show an error UI)
       }
-    });
+    };
+
+    initializeApp();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadUserProgress(session.user.id);
+        await loadUserProgress(session.user.id);
       } else {
         setIsProgressLoaded(false);
       }
@@ -90,6 +101,9 @@ const App: React.FC = () => {
 
     for (let i = 0; i < retries; i++) {
       try {
+        // Validate connection before each attempt
+        await validateConnection();
+
         // First, try to create the profile if it doesn't exist
         const { error: insertError } = await supabase
           .from('profiles')
@@ -132,7 +146,10 @@ const App: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
       } catch (err) {
         console.error(`Attempt ${i + 1}/${retries} - Unexpected error:`, err);
-        await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
+        if (i < retries - 1) {
+          await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
+          continue;
+        }
       }
     }
     
