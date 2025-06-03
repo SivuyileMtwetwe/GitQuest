@@ -216,6 +216,8 @@ const App: React.FC = () => {
           points,
           level: currentLevel,
           achievements: JSON.stringify(achievements)
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) {
