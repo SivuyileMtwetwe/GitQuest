@@ -6,7 +6,7 @@ import { AuthModal } from '../components/AuthModal';
 import { Leaderboard } from '../components/Leaderboard';
 import { supabase } from '../lib/supabase';
 import { useAchievements } from '../hooks/useAchievements';
-import { AchievementPopup } from '../components/AchievementPopup';
+import AchievementPopup from '../components/AchievementPopup';
 
 export interface Challenge {
   id: number;
