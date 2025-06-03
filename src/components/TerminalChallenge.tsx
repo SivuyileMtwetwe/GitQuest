@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, X, BookOpen } from 'lucide-react';
 import { Challenge } from '../pages/Index';
@@ -25,7 +24,6 @@ const TerminalChallenge: React.FC<TerminalChallengeProps> = ({ challenge, onComp
     
     setTimeout(() => {
       onComplete(isCorrect);
-      // Reset state for next challenge
       setUserInput('');
       setHasSubmitted(false);
       setShowResult(false);
@@ -36,24 +34,24 @@ const TerminalChallenge: React.FC<TerminalChallengeProps> = ({ challenge, onComp
   const isCorrect = userInput.trim().toLowerCase() === correctAnswer;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {challenge.content && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
-          <div className="flex items-center mb-3">
-            <BookOpen className="w-5 h-5 text-blue-600 mr-2" />
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+          <div className="flex items-center mb-2 md:mb-3">
+            <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-blue-600 mr-2" />
             <h3 className="font-semibold text-blue-800">Learn First</h3>
           </div>
-          <div className="text-blue-700 text-sm leading-relaxed">
+          <div className="text-sm md:text-base text-blue-700 leading-relaxed">
             {challenge.content}
           </div>
         </div>
       )}
 
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">
         {challenge.question}
       </h2>
 
-      <div className="bg-gray-900 rounded-xl p-6 font-mono text-sm">
+      <div className="bg-gray-900 rounded-xl p-4 md:p-6 font-mono text-sm md:text-base">
         <div className="text-green-400 mb-4">
           user@github-quest:~$
         </div>
@@ -86,7 +84,7 @@ const TerminalChallenge: React.FC<TerminalChallengeProps> = ({ challenge, onComp
         )}
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="text-sm text-gray-600">
           Hint: Use the exact Git command syntax
         </div>
@@ -95,7 +93,7 @@ const TerminalChallenge: React.FC<TerminalChallengeProps> = ({ challenge, onComp
           <button
             onClick={handleSubmit}
             disabled={!userInput.trim()}
-            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-medium hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full md:w-auto px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-medium hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             Execute Command
           </button>
@@ -103,19 +101,19 @@ const TerminalChallenge: React.FC<TerminalChallengeProps> = ({ challenge, onComp
       </div>
 
       {showResult && (
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl animate-fade-in">
+        <div className="mt-4 md:mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl animate-fade-in">
           <h3 className="font-semibold text-blue-800 mb-2">Explanation:</h3>
-          <p className="text-blue-700">{challenge.explanation}</p>
+          <p className="text-sm md:text-base text-blue-700">{challenge.explanation}</p>
           
           {isCorrect ? (
             <div className="mt-3 flex items-center text-green-600">
-              <Check className="w-5 h-5 mr-2" />
-              <span className="font-medium">Correct! +50 points</span>
+              <Check className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+              <span className="font-medium text-sm md:text-base">Correct! +50 points</span>
             </div>
           ) : (
             <div className="mt-3 flex items-center text-red-600">
-              <X className="w-5 h-5 mr-2" />
-              <span className="font-medium">Incorrect. -25 points. The correct command is: {challenge.correctAnswer}</span>
+              <X className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+              <span className="font-medium text-sm md:text-base">Incorrect. -25 points. The correct command is: {challenge.correctAnswer}</span>
             </div>
           )}
         </div>
