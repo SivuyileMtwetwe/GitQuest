@@ -5,5 +5,5 @@ import { registerSW } from './registerSW';
 
 createRoot(document.getElementById("root")!).render(<App />);
 
-// Register service worker
-registerSW();
+// Service Workers are not supported in this environment
+// registerSW();
