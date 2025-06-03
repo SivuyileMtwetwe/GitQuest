@@ -39,30 +39,39 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setIsLoading(true);
     try {
       if (isSignUp) {
-        const { error: signUpError } = await supabase.auth.signUp({
+        // Sign up flow
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
         });
 
         if (signUpError) throw signUpError;
+        if (!authData.user) throw new Error('No user data returned');
 
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              username: data.username,
-              id: (await supabase.auth.getUser()).data.user?.id,
-            }
-          ]);
+        try {
+          // Create profile
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                id: authData.user.id,
+                username: data.username,
+              }
+            ]);
 
-        if (profileError) throw profileError;
+          if (profileError) throw profileError;
 
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
+          toast({
+            title: "Account created!",
+            description: "You can now sign in with your credentials.",
+          });
+        } catch (profileError: any) {
+          // If profile creation fails, clean up by deleting the auth user
+          await supabase.auth.admin.deleteUser(authData.user.id);
+          throw new Error('Failed to create profile: ' + profileError.message);
+        }
       } else {
+        // Sign in flow
         const { error } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
