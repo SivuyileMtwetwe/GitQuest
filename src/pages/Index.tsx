@@ -78,29 +78,56 @@ const App: React.FC = () => {
   }, []);
 
   const waitForProfile = async (userId: string, retries = 5): Promise<boolean> => {
-    for (let i = 0; i < retries; i++) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (data) {
-        return true;
-      }
-
-      if (error) {
-        console.error('Error checking profile:', error);
-      }
-
-      // Wait for 1 second before retrying
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!userId) {
+      console.error('waitForProfile: No userId provided');
+      return false;
     }
+
+    console.log('Checking profile for user:', userId);
+
+    for (let i = 0; i < retries; i++) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (error) {
+          console.error(`Attempt ${i + 1}/${retries} - Error checking profile:`, error);
+          // Wait longer between retries as attempts increase
+          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          continue;
+        }
+
+        if (data) {
+          console.log('Profile found:', data);
+          return true;
+        }
+
+        console.log(`Attempt ${i + 1}/${retries} - Profile not found, retrying...`);
+        // Wait for 1 second before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (err) {
+        console.error(`Attempt ${i + 1}/${retries} - Unexpected error:`, err);
+        // Wait longer between retries as attempts increase
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+    
+    console.error('Profile not found after maximum retries');
     return false;
   };
 
   const loadUserProgress = async (userId: string) => {
+    if (!userId) {
+      console.error('loadUserProgress: No userId provided');
+      return;
+    }
+
     try {
+      console.log('Loading user progress for:', userId);
+      
       // Wait for profile to be created before proceeding
       const profileExists = await waitForProfile(userId);
       if (!profileExists) {
@@ -121,9 +148,11 @@ const App: React.FC = () => {
 
       if (data) {
         // User has existing progress
+        console.log('Loaded existing progress:', data);
         setPoints(data.points);
         setCurrentLevel(data.level);
       } else {
+        console.log('Initializing new user progress');
         // Initialize new user progress
         const { error: insertError } = await supabase
           .from('scores')
@@ -152,23 +181,29 @@ const App: React.FC = () => {
   const saveProgress = async () => {
     if (!user) return;
 
-    const { error } = await supabase
-      .from('scores')
-      .upsert({
-        user_id: user.id,
-        points,
-        level: currentLevel,
-        achievements: JSON.stringify(achievements)
-      });
+    try {
+      const { error } = await supabase
+        .from('scores')
+        .upsert({
+          user_id: user.id,
+          points,
+          level: currentLevel,
+          achievements: JSON.stringify(achievements)
+        });
 
-    if (error) {
-      console.error('Error saving progress:', error);
+      if (error) {
+        console.error('Error saving progress:', error);
+      }
+    } catch (err) {
+      console.error('Unexpected error saving progress:', err);
     }
   };
 
   useEffect(() => {
-    saveProgress();
-  }, [points, currentLevel]);
+    if (user) {
+      saveProgress();
+    }
+  }, [points, currentLevel, user]);
 
   const handleSelectLevel = (levelId: number) => {
     setCurrentLevel(levelId);
