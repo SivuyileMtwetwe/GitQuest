@@ -60,8 +60,8 @@ const App: React.FC = () => {
   const [levels, setLevels] = useState<Level[]>([
     {
       id: 1,
-      title: "Introduction to Git",
-      description: "Learn the basics of Git version control",
+      title: "Git Fundamentals",
+      description: "Learn the core concepts of Git version control",
       isCompleted: false,
       challenges: [
         {
@@ -75,99 +75,199 @@ const App: React.FC = () => {
             "An operating system"
           ],
           correctAnswer: 0,
-          explanation: "Git is a distributed version control system that tracks changes in source code during software development. It allows multiple developers to work together on projects efficiently."
+          explanation: "Git is a distributed version control system that tracks changes in source code during software development."
         },
         {
           id: 2,
-          type: "terminal",
-          question: "Initialize a Git repository",
-          content: "Create a new Git repository in the current directory.",
-          correctAnswer: "git init",
-          explanation: "The 'git init' command creates a new Git repository in the current directory."
+          type: "quiz",
+          question: "What are the three states of Git?",
+          options: [
+            "Modified, Staged, Committed",
+            "Created, Updated, Deleted",
+            "Local, Remote, Origin",
+            "Push, Pull, Merge"
+          ],
+          correctAnswer: 0,
+          explanation: "Files in Git can be in three states: Modified (changes made), Staged (marked for next commit), and Committed (safely stored)."
         }
       ]
     },
     {
       id: 2,
-      title: "Basic Git Commands",
-      description: "Master the essential Git commands",
+      title: "Working Directory & Staging",
+      description: "Master the Git workflow and staging area",
       isCompleted: false,
       challenges: [
         {
           id: 3,
+          type: "terminal",
+          question: "Stage all modified files for commit",
+          content: "Use the appropriate Git command to add all changed files to the staging area.",
+          correctAnswer: "git add .",
+          explanation: "git add . adds all modified and untracked files in the current directory to the staging area."
+        },
+        {
+          id: 4,
           type: "quiz",
-          question: "What command is used to stage changes?",
+          question: "What is the staging area in Git?",
           options: [
-            "git commit",
-            "git add",
-            "git push",
-            "git stage"
+            "A temporary storage for changes before committing",
+            "The final repository location",
+            "A backup system",
+            "The remote server"
           ],
-          correctAnswer: 1,
-          explanation: "The 'git add' command adds changes to the staging area before committing."
+          correctAnswer: 0,
+          explanation: "The staging area is an intermediate area where changes are prepared before committing."
         }
       ]
     },
     {
       id: 3,
-      title: "Branching & Merging",
-      description: "Learn to work with branches and merging",
+      title: "Commits & History",
+      description: "Learn about commits and viewing history",
       isCompleted: false,
       challenges: [
         {
-          id: 4,
+          id: 5,
+          type: "terminal",
+          question: "Create a commit with a message",
+          content: "Commit your staged changes with the message 'Initial commit'",
+          correctAnswer: "git commit -m \"Initial commit\"",
+          explanation: "This command creates a new commit with the specified message."
+        },
+        {
+          id: 6,
           type: "quiz",
-          question: "What command creates a new branch?",
+          question: "What command shows the commit history?",
           options: [
-            "git branch new-branch",
-            "git checkout branch",
-            "git create branch",
-            "git new branch"
+            "git log",
+            "git history",
+            "git show",
+            "git list"
           ],
           correctAnswer: 0,
-          explanation: "The 'git branch <name>' command creates a new branch with the specified name."
+          explanation: "git log shows the commit history, including commit messages, authors, and timestamps."
         }
       ]
     },
     {
       id: 4,
-      title: "Remote Repositories",
-      description: "Work with remote repositories and collaboration",
+      title: "Branching Basics",
+      description: "Work with branches and merging",
       isCompleted: false,
       challenges: [
         {
-          id: 5,
+          id: 7,
+          type: "terminal",
+          question: "Create and switch to a new branch",
+          content: "Create a new branch named 'feature' and switch to it",
+          correctAnswer: "git checkout -b feature",
+          explanation: "git checkout -b creates a new branch and switches to it in one command."
+        },
+        {
+          id: 8,
           type: "quiz",
-          question: "What command pushes changes to a remote repository?",
+          question: "What does HEAD represent in Git?",
           options: [
-            "git remote push",
-            "git push origin main",
-            "git send",
-            "git upload"
+            "The current branch or commit",
+            "The first commit in history",
+            "The remote repository",
+            "The main branch"
           ],
-          correctAnswer: 1,
-          explanation: "The 'git push origin main' command pushes your local changes to the main branch of the remote repository."
+          correctAnswer: 0,
+          explanation: "HEAD is a pointer that represents the current branch or commit you're working on."
         }
       ]
     },
     {
       id: 5,
-      title: "Advanced Git",
-      description: "Master advanced Git concepts and operations",
+      title: "Remote Operations",
+      description: "Work with remote repositories",
       isCompleted: false,
       challenges: [
         {
-          id: 6,
+          id: 9,
+          type: "terminal",
+          question: "Add a remote repository",
+          content: "Add a remote named 'origin' with URL 'https://github.com/user/repo.git'",
+          correctAnswer: "git remote add origin https://github.com/user/repo.git",
+          explanation: "This command adds a new remote repository with the specified URL."
+        },
+        {
+          id: 10,
           type: "quiz",
-          question: "What is git rebase used for?",
+          question: "What's the difference between git fetch and git pull?",
           options: [
-            "To delete a branch",
-            "To rename a repository",
-            "To integrate changes from one branch into another",
-            "To create a remote repository"
+            "fetch downloads changes without merging, pull downloads and merges",
+            "fetch only works with branches, pull works with all files",
+            "fetch is for remote repos, pull is for local only",
+            "There is no difference"
           ],
-          correctAnswer: 2,
-          explanation: "Git rebase is used to integrate changes from one branch into another, creating a linear commit history."
+          correctAnswer: 0,
+          explanation: "git fetch downloads changes but doesn't merge them, while git pull downloads and automatically merges changes."
+        }
+      ]
+    },
+    {
+      id: 6,
+      title: "Merge Conflicts",
+      description: "Handle and resolve merge conflicts",
+      isCompleted: false,
+      challenges: [
+        {
+          id: 11,
+          type: "quiz",
+          question: "When do merge conflicts occur?",
+          options: [
+            "When two branches modify the same file differently",
+            "When creating a new branch",
+            "When pushing to remote",
+            "When using git status"
+          ],
+          correctAnswer: 0,
+          explanation: "Merge conflicts occur when Git can't automatically merge changes because two branches modified the same part of a file differently."
+        }
+      ]
+    },
+    {
+      id: 7,
+      title: "Git Flow",
+      description: "Learn the Git Flow branching model",
+      isCompleted: false,
+      challenges: [
+        {
+          id: 12,
+          type: "quiz",
+          question: "What are the two main branches in Git Flow?",
+          options: [
+            "master/main and develop",
+            "staging and production",
+            "test and live",
+            "feature and bugfix"
+          ],
+          correctAnswer: 0,
+          explanation: "Git Flow uses master/main for production code and develop as the integration branch for features."
+        }
+      ]
+    },
+    {
+      id: 8,
+      title: "Advanced Git",
+      description: "Master advanced Git operations",
+      isCompleted: false,
+      challenges: [
+        {
+          id: 13,
+          type: "quiz",
+          question: "What does git rebase do?",
+          options: [
+            "Rewrite commit history to create a linear history",
+            "Delete all commits",
+            "Create a new repository",
+            "Push to remote"
+          ],
+          correctAnswer: 0,
+          explanation: "git rebase rewrites commit history by moving or combining commits, creating a linear project history."
         }
       ]
     }
