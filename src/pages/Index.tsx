@@ -58,7 +58,56 @@ const App: React.FC = () => {
   };
 
   const [levels, setLevels] = useState<Level[]>([
-    // ... (keep all the existing levels data exactly as in the original)
+    {
+      id: 1,
+      title: "Introduction to Git",
+      description: "Learn the basics of Git version control",
+      isCompleted: false,
+      challenges: [
+        {
+          id: 1,
+          type: "quiz",
+          question: "What is Git?",
+          options: [
+            "A programming language",
+            "A version control system",
+            "A text editor",
+            "An operating system"
+          ],
+          correctAnswer: "A version control system",
+          explanation: "Git is a distributed version control system that tracks changes in source code during software development."
+        },
+        {
+          id: 2,
+          type: "terminal",
+          question: "Initialize a Git repository",
+          content: "Create a new Git repository in the current directory.",
+          correctAnswer: "git init",
+          explanation: "The 'git init' command creates a new Git repository in the current directory."
+        }
+      ]
+    },
+    {
+      id: 2,
+      title: "Basic Git Commands",
+      description: "Master the essential Git commands",
+      isCompleted: false,
+      challenges: [
+        {
+          id: 3,
+          type: "quiz",
+          question: "What command is used to stage changes?",
+          options: [
+            "git commit",
+            "git add",
+            "git push",
+            "git stage"
+          ],
+          correctAnswer: "git add",
+          explanation: "The 'git add' command adds changes to the staging area before committing."
+        }
+      ]
+    }
   ]);
 
   useEffect(() => {
@@ -423,5 +472,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-export default App
