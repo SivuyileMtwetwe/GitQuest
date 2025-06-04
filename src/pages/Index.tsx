@@ -69,13 +69,13 @@ const App: React.FC = () => {
           type: "quiz",
           question: "What is Git?",
           options: [
-            "A programming language",
             "A distributed version control system",
+            "A programming language",
             "A text editor",
             "An operating system"
           ],
-          correctAnswer: "A distributed version control system",
-          explanation: "Git is a distributed version control system that tracks changes in source code during software development."
+          correctAnswer: 0,
+          explanation: "Git is a distributed version control system that tracks changes in source code during software development. It allows multiple developers to work together on projects efficiently."
         },
         {
           id: 2,
@@ -103,7 +103,7 @@ const App: React.FC = () => {
             "git push",
             "git stage"
           ],
-          correctAnswer: "git add",
+          correctAnswer: 1,
           explanation: "The 'git add' command adds changes to the staging area before committing."
         }
       ]
