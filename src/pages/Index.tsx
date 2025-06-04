@@ -70,11 +70,11 @@ const App: React.FC = () => {
           question: "What is Git?",
           options: [
             "A programming language",
-            "A version control system",
+            "A distributed version control system",
             "A text editor",
             "An operating system"
           ],
-          correctAnswer: "A version control system",
+          correctAnswer: "A distributed version control system",
           explanation: "Git is a distributed version control system that tracks changes in source code during software development."
         },
         {
