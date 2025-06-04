@@ -107,16 +107,76 @@ const App: React.FC = () => {
           explanation: "The 'git add' command adds changes to the staging area before committing."
         }
       ]
+    },
+    {
+      id: 3,
+      title: "Branching & Merging",
+      description: "Learn to work with branches and merging",
+      isCompleted: false,
+      challenges: [
+        {
+          id: 4,
+          type: "quiz",
+          question: "What command creates a new branch?",
+          options: [
+            "git branch new-branch",
+            "git checkout branch",
+            "git create branch",
+            "git new branch"
+          ],
+          correctAnswer: 0,
+          explanation: "The 'git branch <name>' command creates a new branch with the specified name."
+        }
+      ]
+    },
+    {
+      id: 4,
+      title: "Remote Repositories",
+      description: "Work with remote repositories and collaboration",
+      isCompleted: false,
+      challenges: [
+        {
+          id: 5,
+          type: "quiz",
+          question: "What command pushes changes to a remote repository?",
+          options: [
+            "git remote push",
+            "git push origin main",
+            "git send",
+            "git upload"
+          ],
+          correctAnswer: 1,
+          explanation: "The 'git push origin main' command pushes your local changes to the main branch of the remote repository."
+        }
+      ]
+    },
+    {
+      id: 5,
+      title: "Advanced Git",
+      description: "Master advanced Git concepts and operations",
+      isCompleted: false,
+      challenges: [
+        {
+          id: 6,
+          type: "quiz",
+          question: "What is git rebase used for?",
+          options: [
+            "To delete a branch",
+            "To rename a repository",
+            "To integrate changes from one branch into another",
+            "To create a remote repository"
+          ],
+          correctAnswer: 2,
+          explanation: "Git rebase is used to integrate changes from one branch into another, creating a linear commit history."
+        }
+      ]
     }
   ]);
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Validate Supabase connection first
         await validateConnection();
-        
-        // Check for existing session
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -124,13 +184,11 @@ const App: React.FC = () => {
         }
       } catch (err) {
         console.error('Failed to initialize app:', err);
-        // Handle initialization error (you might want to show an error UI)
       }
     };
 
     initializeApp();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -149,14 +207,10 @@ const App: React.FC = () => {
       return false;
     }
 
-    console.log('Checking profile for user:', userId);
-
     for (let i = 0; i < retries; i++) {
       try {
-        // Validate connection before each attempt
         await validateConnection();
 
-        // First, try to create the profile if it doesn't exist
         const { error: insertError } = await supabase
           .from('profiles')
           .upsert({ 
@@ -169,14 +223,12 @@ const App: React.FC = () => {
 
         if (insertError) {
           console.error(`Attempt ${i + 1}/${retries} - Error creating profile:`, insertError);
-          // Only wait and retry if it's not a unique constraint violation
           if (!insertError.message.includes('unique constraint')) {
             await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
             continue;
           }
         }
 
-        // Then check if the profile exists
         const { data, error } = await supabase
           .from('profiles')
           .select('id')
@@ -190,11 +242,9 @@ const App: React.FC = () => {
         }
 
         if (data) {
-          console.log('Profile found:', data);
           return true;
         }
 
-        console.log(`Attempt ${i + 1}/${retries} - Profile not found, retrying...`);
         await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, i), 10000)));
       } catch (err) {
         console.error(`Attempt ${i + 1}/${retries} - Unexpected error:`, err);
@@ -205,7 +255,6 @@ const App: React.FC = () => {
       }
     }
     
-    console.error('Profile not found after maximum retries');
     return false;
   };
 
@@ -216,10 +265,8 @@ const App: React.FC = () => {
     }
 
     try {
-      console.log('Loading user progress for:', userId);
       setIsProgressLoaded(false);
       
-      // Wait for profile to be created before proceeding
       const profileExists = await waitForProfile(userId);
       if (!profileExists) {
         console.error('Profile not found after maximum retries');
@@ -236,7 +283,6 @@ const App: React.FC = () => {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // No data found, initialize new user progress
           console.log('Initializing new user progress');
           const { error: insertError } = await supabase
             .from('scores')
@@ -254,7 +300,6 @@ const App: React.FC = () => {
             return;
           }
 
-          // Set initial state
           setPoints(0);
           setCurrentLevel(1);
           setIsProgressLoaded(true);
@@ -264,8 +309,6 @@ const App: React.FC = () => {
         return;
       }
 
-      // User has existing progress
-      console.log('Loaded existing progress:', data);
       setPoints(data.points);
       setCurrentLevel(data.level);
       setIsProgressLoaded(true);
@@ -375,7 +418,6 @@ const App: React.FC = () => {
 
   const handleStartGame = () => {
     setGameStarted(true);
-    // Reset game state
     setCurrentLevel(1);
     setChallengeIndex(0);
     setIncorrectAnswers(new Set());
